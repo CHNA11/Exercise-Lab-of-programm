@@ -1,0 +1,9 @@
+# ignorare .exe file
+*.exe
+
+# ignorare .file durante configurazione
+*.o
+*.obj
+
+#ignorare file generato da VS code
+-vscode/
