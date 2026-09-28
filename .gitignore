@@ -6,4 +6,4 @@
 *.obj
 
 #ignorare file generato da VS code
--vscode/
+.vscode/
