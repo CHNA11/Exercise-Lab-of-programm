@@ -12,6 +12,6 @@ int main(){
     int decina= ((intero %100) - unità) /10; //decina sarà intero tolta la prima da sinistra e destra
     int centinaia= (intero - (intero %100))/100; //centinaia sarà intero tolta prima e seconda da destra
     int oretni = (unità*100) + (decina*10) + centinaia; // calcolare intero invertito usando cifre estratte
-    printf("il numero inserito invertito è : %d538",oretni); // stampare risultato
+    printf("il numero inserito invertito è : %d ",oretni); // stampare risultato
     return 0;
 }
