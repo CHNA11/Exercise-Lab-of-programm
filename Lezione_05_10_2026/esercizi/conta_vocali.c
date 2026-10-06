@@ -4,7 +4,7 @@
 int main() {
     char parola[20]; // dichiarare variabile che contiene parola inserito
     printf("Inserisci una parola non superiori a 20 caratteri : "); //chiedere a utente senza superare limite
-    scanf("%s", parola);
+    scanf("%s", &parola);
     printf("\n");
     int lunghezza = strlen(parola); // considero lunghezza effettiva inserita
     for(int i=0; i<lunghezza;i++){
