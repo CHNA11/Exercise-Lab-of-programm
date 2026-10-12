@@ -31,7 +31,7 @@ int main(){
     for(int i=0; i<lunghezza-1; i++){ //bubble sort
         for(int j=0; j<lunghezza-1-i; j++){
             if (strcasecmp(elenco[j],elenco[j+1])>0){  //maggiore di zero significa alfabeticamente viene dopo
-                //usare questo comando riposrtato da strings.h evita differenza di maiuscola e minuscola
+                //usare questo comando riportato da strings.h evita differenza di maiuscola e minuscola
                 strcpy(temp,elenco[j]); //scambio
                 strcpy(elenco[j],elenco[j+1]);
                 strcpy(elenco[j+1],temp);
