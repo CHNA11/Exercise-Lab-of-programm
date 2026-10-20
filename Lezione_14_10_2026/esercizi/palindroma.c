@@ -6,7 +6,7 @@
 //dihciarazione prototipo della funzione
 void controllo(char * parola);
 //ripreso da contavocali
-void *inserimento(char *parola);
+void inserimento(char *parola);
 
 int main(){
     //allocazione dinamico
@@ -42,7 +42,7 @@ void controllo(char *parola){
     }
 }
 
-void *inserimento(char *parola){
+void inserimento(char *parola){
     //chiedere a utente per inserire una parola
     printf("si chiede di inserire una parola : ");
     scanf("%s",parola);

@@ -2,7 +2,7 @@
 # include <stdlib.h>
 // dichiarazione prototipo delle funzione
 int somma(int numeri[],int n); 
-int richiesta(int numeri[],int n);
+void richiesta(int numeri[],int n);
 float media(int somma, int n);
 //passare a main
 int main(){
@@ -25,7 +25,7 @@ int main(){
     free(vett);
 }
 
-int richiesta(int numeri[], int n){
+void richiesta(int numeri[], int n){
     //richiesta di valori
     for(int i=0; i<n; i++){
         printf("inserisci numero nella posizione %d : ",i+1);
