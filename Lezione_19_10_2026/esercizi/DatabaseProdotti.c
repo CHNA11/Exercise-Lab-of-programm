@@ -29,6 +29,10 @@ int main()
         return 0;
     }
     Prodotto *prodotti = allocazione(n); //altrimenti si inzia allocazione dinamico
+    if(prodotti==NULL){ //controllo di allocazione
+        printf("allocazione insuccesso");
+        return 1;
+    }
     inserimento(prodotti, n); //richiama funzione ad iniziare inserire i dati
     scelta(prodotti, menu(), n); //prendere scelta sulle funzioni
     free(prodotti); //ricordare di liberare la memoria
@@ -229,6 +233,6 @@ void ordine(Prodotto *prodotti, int n)
             }
         }
     }
-    printf("dopo ordinamento ");
-    visualizza(prodotti, n);
+    printf("dopo ordinamento "); //stampa risultato ordinato
+    visualizza(prodotti, n); //una volta ordinato, basta richiamare punzione che stampa
 }
