@@ -1,0 +1,6 @@
+ecco la tabella degli studenti
+matricola  nome       cognome    numero di esami sostenuti media     
+130368     Renhao     Chen       1                    30.00     
+Lo studente Renhao Chen ha la media più alta : 30.00
+0.00 % di studenti hanno sostetuno tutti 6 esami
+La media generale dei studenti è 30.00

@@ -6,25 +6,32 @@ typedef struct
     int matricola;
     char nome[50];
     char cognome[50];
-    int voti[6]; // dichiarato come puntatore
+    int voti[6]; 
     int num_esami_sostenuti;
-} Studente;
+} Studente; //definizione  struttura richiesto
 
 // questi sono funzioni ripresi da Gestione Università e modificati
 int menu();
-void scelta(Studente *classe, int s, int n_studente);
+void scelta(Studente *classe, int s, int n);
 float calcolamedia(Studente studente);
-void trovamediaalta(Studente *classe, int n_studente);
+int trovamediaalta(Studente *classe, int c);
 int richiesta();
 Studente *allocazione(int n);
-void inserimentostudente(Studente *classe, int n_studente);
+void inserimentostudente(Studente *classe, int *p, int n);
 void aggiuntaesame(Studente *studente);
+void visualizzadecrescente(Studente *classe, int c);
+//questi sono funzioni prototipo scritte da 0
+void salva(Studente *classe, int *p);
+void cerca(Studente *classe, int c, int matricola);
+void carica(Studente *classe, int *p, int n);
+void report(Studente *classe, int c);
 
 int main()
 {
-    int n = richiesta();
-    Studente *classe = (Studente *)malloc(n * sizeof(Studente)); // allocazione dinamica
-    scelta(classe, menu(), n);
+    int n = richiesta(); //chiedere a utante quanti sono numeri di studente da gestire
+    Studente *classe = allocazione(n); // allocazione dinamica
+    scelta(classe, menu(), n); //richiama funzione di scelta con menu
+    free(classe); //liberazione allocazione dinamica
     return 0;
 }
 
@@ -48,126 +55,102 @@ Studente *allocazione(int n)
         printf("allocazione insuccesso\n");
         exit(1);
     }
-    for (int i = 0; i < n; i++)
-    { // iniizializzazione e allocazione per esami
-        classe[i].matricola = 0;
-        classe[i].num_esami = 0;
-        classe[i].esami = (Esame *)malloc(5 * sizeof(Esame)); // allocazioni per defaul 5
-        if (classe[i].esami == NULL)
-        { // controllo
-            printf("allocazione insuccesso\n");
-            exit(1);
-        }
-    }
     return classe;
 }
 
-void inserimentostudente(Studente *classe, int n_studente)
+void inserimentostudente(Studente *classe, int *p, int n)
 {
-    int flag = 0; // indicatrice se inserimento è andato con successo
-    do
+    int temp; //dichiarazione variabile temporanea
+    int c = *p; //inizializzare valore nel puntatore p per comodità
+    if (c >= n) //controllare di non uscire dal limite
     {
-        int ind; // indice di inserimento dello studente
-        flag = 0;
-        do
-        {
-            printf("inserisci numero di posizione per studente da gestire : ");
-            scanf("%d", &ind);
-        } while (ind < 0 || ind > n_studente);
-        if (classe[ind - 1].matricola != 0) // si ricorda che computer comincia da 0, quindi si trasla di uno a sinistra
-        {                                   // controllare di non scrvivere sopra quello già fatto
-            printf("studente già esistente nella posizione %d\n", ind);
+        printf("numero di studente esistente superiore dalla capacità definita all'inizio\n");
+        return;
+    }
+    printf("inserisci numero di matricola dello studente : "); //richiesta dati dello studente
+    scanf("%d", &temp); // prima si salva in temp per controllare
+    for (int j = 0; j < c; j++)
+    { //controlla che studente non deve ripetere per numero di matricola
+        if (classe[j].matricola == temp)
+        { // controllare che non inserisca studente allo stesso numero di matricola
+            printf("numero di matricola già esistente");
+            return;
         }
-        else
-        {
-            printf("inserisci numero di matricola dello studente : ");
-            scanf("%d", &classe[ind - 1].matricola); // questo è un int
-            for (int j = 0; j < ind - 1; j++)
-            {
-                if (classe[j].matricola == classe[ind - 1].matricola)
-                { // controllare che non inserisca studente allo stesso numero di matricola
-                    printf("numero di matricola già esistente");
-                    return;
-                }
-            }
-            printf("inserisci nome dello studente : ");
-            scanf("%s", classe[ind - 1].nome); // questi sono puntatori
-            printf("inserisci cognome dello studente : ");
-            scanf("%s", classe[ind - 1].cognome);
-            classe[ind - 1].max_esami = 0; // inizializzare
-            flag = 1;                      // se ha inserito in modo valido si esce dal ciclo
-        }
-    } while (flag != 1); // controlla se ha effettivamente inserito dati del studente
+    }
+    //se non ci sono errori, si registra effettivamente dati
+    classe[c].matricola = temp;
+    printf("inserisci nome dello studente : ");
+    scanf("%s", classe[c].nome); // questi sono puntatori
+    printf("inserisci cognome dello studente : ");
+    scanf("%s", classe[c].cognome);
+    classe[c].num_esami_sostenuti = 0; // inizializzare
+    (*p)++; //incrementare contatore per numero di studenti registrati, puntatore per modifica globale
 }
 
-int aggiuntaesame(Studente *studente)
+void aggiuntaesame(Studente *studente)
 {
+    if(studente->num_esami_sostenuti>=6){ //controllo di array pieno
+        printf("il studente corrispondente ha già registrato tutti 6 esami\n");
+        return;
+    }
     do
     {
-        printf("inserisci voto del esame nella posizione %d : ",studente->num_esami_sostenuti+1);
+        printf("inserisci voto del esame nella posizione %d : ", studente->num_esami_sostenuti + 1);
         scanf("%d", &studente->voti[studente->num_esami_sostenuti]); // studente è puntatore, ma tutto non lo è, richiede &
     } while (studente->voti[studente->num_esami_sostenuti] < 18 || studente->voti[studente->num_esami_sostenuti] > 30); // un voto che viene registrato deve essere valido
+    studente->num_esami_sostenuti++; //ogni volta che registra un voto incrementa anche numero di esami sostenuti
 }
 
 float calcolamedia(Studente studente)
 {
-    int TC = 0;    // inizializzazione di CFU totale
-    float sum = 0; // inizializzare una somma per voti * CFU e dividere per TC alla fine
-    if (studente.num_esami == 0)
+    int sum = 0; // inizializzare una somma per voti
+    if (studente.num_esami_sostenuti == 0)
     { // si considera caso non ha ancora registrato alcun esame
-        return 0;
+        return 0; //uscire per evitare divisione per 0
     }
-    for (int i = 0; i < studente.num_esami; i++)
-    { // se ha esami registrati, si sommano i valori per calcolare media pesata
-        sum = sum + (studente.esami[i].CFU * studente.esami[i].voto);
-        TC = TC + studente.esami[i].CFU;
+    for (int i = 0; i < studente.num_esami_sostenuti; i++)
+    { // se ha esami registrati, si sommano i valori
+        sum = sum + (studente.voti[i]);
     }
-    float media = (float)sum / TC; // si esclude automaticamente caso TC =0, perché numero di esami se è 0, esce prima, per limite di inserimento di CFU ha almeno 1
-    return media;                  // invece di void ritorna la media e stampa a funzione scelta, perché così richiamo anche per trovare media, e statistica
+    float media = (float)sum / studente.num_esami_sostenuti; // si esclude automaticamente divisione per 0 considerato già prima
+    return media;                                            // invece di void ritorna la media e stampa a funzione scelta, perché così facilita nelle richiami dei altri funzioni
 }
 
-void trovamediaalta(Studente *classe, int n_studente)
+int trovamediaalta(Studente *classe, int c)
 {
-    int ind_max = 0;
-    for (int i = 0; i < n_studente; i++)
+    int ind_max = 0; //inizializzazione variabile per indice di massimo
+    for (int i = 0; i < c; i++)
     {
         if (calcolamedia(classe[ind_max]) < calcolamedia(classe[i])) // in effetti uso ritorno di calcolamedia per confrontare
         {
             ind_max = i; // classico metodo di ricerca massimo
         }
     }
-    // stampa risultato
-    printf("lo studente %s %s ha media più alta : %.2f \n", classe[ind_max].nome, classe[ind_max].cognome, calcolamedia(classe[ind_max]));
+    return ind_max; //ritornare un valore di indice per scrittura nel file
 }
 
-void visualizzadecrescente(Studente studente)
+void visualizzadecrescente(Studente *classe, int c)
 {
-    Esame temp; // dichiarazione temporanea di variabile per scambio
-    if (studente.num_esami == 0)
-    { // considera caso senza esami
-        printf("lo studente scelto non ha esami registrati\n");
-    }
-    else
-    { // bubble sort per comodità
-        for (int i = 0; i < studente.num_esami - 1; i++)
+    Studente temp; // dichiarazione temporanea di variabile per scambio
+                   // bubble sort per comodità
+    for (int i = 0; i < c - 1; i++)
+    {
+        for (int j = 0; j < c - 1 - i; j++)
         {
-            for (int j = 0; j < studente.num_esami - 1 - i; j++)
-            {
-                if (studente.esami[j].voto < studente.esami[j + 1].voto) // decrescente
-                {                                                        // scambio
-                    temp = studente.esami[j];
-                    studente.esami[j] = studente.esami[j + 1];
-                    studente.esami[j + 1] = temp;
-                }
+            if (calcolamedia(classe[j]) < calcolamedia(classe[j + 1])) // decrescente
+            {                                                              // scambio
+                temp = classe[j];
+                classe[j] = classe[j + 1];
+                classe[j + 1] = temp;
             }
         }
-        // stampa risultato
-        printf("ecco la tabella degli esami registrati ordinati per voto decrescente\n");
-        printf("%-20s %-4s %-4s %-12s\n", "nome del corso", "voto", "CFU", "data");
-        for (int i = 0; i < studente.num_esami; i++)
-        { // stampa in modo tabulato
-            printf("%-20s %-4d %-4d %-12s\n", studente.esami[i].nome_corso, studente.esami[i].voto, studente.esami[i].CFU, studente.esami[i].data);
-        }
+    }
+    // stampa risultato
+    printf("ecco la tabella degli studenti ordinati per media decrescente\n");
+    printf("%-10s %-10s %-10s %-20s %-10s\n", "matricola", "nome", "cognome", "numero di esami sostenuti", "media");
+    for (int i = 0; i < c; i++)
+    { // stampa in modo tabulato
+        printf("%-10d %-10s %-10s %-20d %-10.2f\n", classe[i].matricola, classe[i].nome, classe[i].cognome, classe[i].num_esami_sostenuti, calcolamedia(classe[i]));
     }
 }
 
@@ -188,16 +171,16 @@ int menu()
     return s;        // ritornare valore per registrare scelta usato in funzione "scelta"
 }
 
-void scelta(Studente *classe, int s, int n_studenti)
+void scelta(Studente *classe, int s, int n)
 {
-    int c = 0;
-    int *p = &c;
+    int c = 0; //inizializzazione contatore per numero di studenti inseriti
+    int *p = &c; //inizializzare anche puntatore per c, che poi viene presa dalle funzione e modificate valori di c
     while (s != 8) // ha senso solo se non ha scelto uscire
     {
         switch (s)
         { // vari casi della scelta
         case 1:
-            inserimentostudente(classe, p);
+            inserimentostudente(classe,p, n);
             break;
         case 2:
         {                  // in realtà si può scrivere una funzione per inserimento, ma per differenza di frase per inserimento non lo faccio
@@ -205,13 +188,14 @@ void scelta(Studente *classe, int s, int n_studenti)
             printf("inserisci numero di matrico dello studente che intendi registrare esami : ");
             scanf("%d", &matricola);
             int flag = 0; // indicatrice per registrazione dell'esame
-            for (int i = 0; i < n_studenti; i++)
+            for (int i = 0; i < c; i++)
             {
                 if (classe[i].matricola == matricola)
                 { // avvisare studente corrispondente al numero di matricola
                     printf("il numero di matricola corrisponde a studente %s %s\n", classe[i].nome, classe[i].cognome);
                     aggiuntaesame(&classe[i]);
                     flag = 1;
+                    break; //si può direttamente uscire dal primo trovato perché nella registrazione dei dati ho già escluso casi di ripetizione
                 }
             }
             if (flag == 0)
@@ -226,51 +210,27 @@ void scelta(Studente *classe, int s, int n_studenti)
         }
         case 3:
         {
-            int matricolaa; // ho poca fantasia per nome di variabili di inserimento
-            printf("inserisci numero di matrico dello studente che intendi calcolare la media : ");
-            scanf("%d", &matricolaa);
-            int flagg = 0; // ho poca fantasia per nome dei indicatori
-            for (int i = 0; i < n_studenti; i++)
-            {
-                if (classe[i].matricola == matricolaa)
-                {
-                    printf("il numero di matricola corrisponde a studente %s %s\n", classe[i].nome, classe[i].cognome);
-                    printf("il studente corrispondente ha media pesata : %.2f\n", calcolamedia(classe[i]));
-                    flagg = 1;
-                }
-            }
-            if (flagg == 0)
-            {
-                printf("numero di matricola non registrato\n");
-            }
+            salva(classe, p);
             break;
         }
         case 4:
-            trovamediaalta(classe, n_studenti);
+            report(classe, c);
             break;
         case 5:
         {
-            int matricolaaa; // come caso 2, 3
-            printf("inserisci numero di matrico dello studente che intendi visualizzare esami : ");
-            scanf("%d", &matricolaaa);
-            int flaggg = 0; // come caso 2,3
-            for (int i = 0; i < n_studenti; i++)
-            {
-                if (classe[i].matricola == matricolaaa)
-                {
-                    printf("il numero di matricola corrisponde a studente %s %s\n", classe[i].nome, classe[i].cognome);
-                    visualizzadecrescente(classe[i]);
-                    flaggg = 1;
-                }
-            }
-            if (flaggg == 0)
-            {
-                printf("numero di matricola non registrato\n");
-            }
+            carica(classe,p, n);
             break;
         }
         case 6:
-            statistica(classe, n_studenti);
+        {
+            int matricola;
+            printf("inserisci numero di matricola dello studenta : ");
+            scanf("%d", &matricola);
+            cerca(classe, c, matricola);
+        }
+        break;
+        case 7:
+            visualizzadecrescente(classe, c);
             break;
         default: // se non è uno dei precedenti
             printf("scelta non valida, si chiede di scegliere funzione valida : \n");
@@ -278,4 +238,127 @@ void scelta(Studente *classe, int s, int n_studenti)
         s = menu(); // rinnovare scelta
     }
     printf("Uscita in corso........\n");
+}
+
+void salva(Studente *classe, int *p)
+{
+    int c=*p; //inizializzare valore salvato nel indirizzo puntato da p per comodità
+    FILE *fp;
+    fp = fopen("studenti.dat", "wb"); //apertura file binario in scrittura
+    if (fp == NULL)
+    { //controllo
+        printf("Errore nel salvare dati\n");
+        return;
+    }
+    size_t flag; //inizializzare indicatore per controllo di scrittura
+    flag = fwrite(p, sizeof(int), 1, fp); //si scrive all'inizio valore di studenti registrati per essere usati dopo
+    if (flag != 1)
+    { //controllo
+        printf("Errore scrittura\n");
+        fclose(fp); //si ricorda di chiudere file
+        return;
+    }
+    flag = fwrite(classe, sizeof(Studente), c, fp);
+    if (flag != c)
+    { //controllo
+        printf("Errore scrittura\n");
+        fclose(fp);
+        return;
+    }
+    fclose(fp);//in qualsiasi caso chiudere il file
+    printf("file salvato con successo\n"); //stampa andamento della funzione
+    return;
+}
+
+void cerca(Studente *classe, int c, int matricola)
+{ //in questo caso serve solo valore di c
+    // stampa risultato
+    printf("ecco la tabella degli studenti corrispondenti\n"); //in realtà può esistere al più 1
+    printf("%-10s %-10s %-10s %-20s %-10s\n", "matricola", "nome", "cognome", "numero di esami sostenuti", "media");
+    for (int i = 0; i < c; i++)
+    {
+        if (classe[i].matricola == matricola)
+        {
+            printf("%-10d %-10s %-10s %-20d %-10.2f\n", classe[i].matricola, classe[i].nome, classe[i].cognome, classe[i].num_esami_sostenuti, calcolamedia(classe[i]));
+            return; //come detto prima trovato 1 si può uscire dal ciclo
+        }
+    }
+    return;
+}
+
+void carica(Studente *classe, int *p, int n)
+{
+    FILE *fp;
+    fp = fopen("studenti.dat", "rb"); //apertura file binario da leggere
+    if (fp == NULL)
+    { //controllo
+        printf("Errore apertura file\n");
+        return;
+    }
+    size_t flag; //dichiarazione variabile per controllo lettura
+    flag = fread(p, sizeof(int), 1, fp); //lettura quantità di studenti all'inizio
+    if (flag != 1)
+    { //controllo
+        printf("Errore Lettura file\n");
+        fclose(fp);
+        return;
+    }
+    if (*p > n)
+    { //controlla di non superare spazio allocato dinamicamente all'inzio
+        printf("File contiene numero di studenti superiori allo numero definito all'inizio  \n");
+        fclose(fp);
+        //si può fare pure una funzione di riallocazione in questo caso, ma non ho voglia
+        return;
+    }
+    flag = fread(classe, sizeof(Studente), *p, fp);
+    if (flag != *p)
+    { //controllo
+        printf("Errore Lettura file\n");
+        fclose(fp);
+        return;
+    }
+    fclose(fp); //infatti mi sono scordato di chiudere il file
+    printf("File caricato correttamente\n");
+    return;
+}
+
+void report(Studente *classe, int c)
+{
+    FILE *fp;
+    fp = fopen("report_studenti.txt", "w"); //apertura file txt in scrittura
+    if (fp == NULL)
+    { //controllo
+        printf("Errore apertura file");
+        return;
+    }
+    if (c == 0)
+    { //evitare di fare lavori inutili e divisione per 0
+        fprintf(fp, "non ci sono studenti registrati\n");
+        fclose(fp);
+        return;
+    }
+    // stampa risultato
+    fprintf(fp, "ecco la tabella degli studenti\n");
+    fprintf(fp, "%-10s %-10s %-10s %-20s %-10s\n", "matricola", "nome", "cognome", "numero di esami sostenuti", "media");
+    float sum = 0; //inizializzazione variabile per media generale
+    for (int i = 0; i < c; i++)
+    { // stampa in modo tabulato
+        sum = sum + calcolamedia(classe[i]); //sfeuttare direttamente questo ciclo per summa e media generale
+        fprintf(fp, "%-10d %-10s %-10s %-20d %-10.2f\n", classe[i].matricola, classe[i].nome, classe[i].cognome, classe[i].num_esami_sostenuti, calcolamedia(classe[i]));
+    }
+    int ind = trovamediaalta(classe, c);
+    fprintf(fp, "Lo studente %s %s ha la media più alta : %.2f\n", classe[ind].nome, classe[ind].cognome, calcolamedia(classe[ind]));
+    int cont = 0; //inizializzazione contatore per quantità di studenti registrati tutti gli 6 esami
+    for (int i = 0; i < c; i++)
+    { //in realtà posso anche mettere insieme a quello di sopra, però ormai....
+        if (classe[i].num_esami_sostenuti == 6)
+        {
+            cont++;
+        }
+    }
+    //scrivere risultato sul file
+    fprintf(fp, "%.2f %% di studenti hanno sostetuno tutti 6 esami\n", (float)cont * 100 / c);
+    fprintf(fp, "La media generale dei studenti è %.2f\n", sum / c);
+    fclose(fp); //chiusura file
+    return;
 }
