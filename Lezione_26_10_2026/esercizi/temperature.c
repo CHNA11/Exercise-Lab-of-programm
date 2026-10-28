@@ -50,10 +50,7 @@ void inserimento(FILE *fp, int n)
         printf("inserisci temperatura del giorno nella posizione %d : ", i + 1);
         scanf("%f", &temp); //legge valore da tastiera e salvare in temp
         fprintf(fp, "%.2f ", temp); //stampare questo valore salvato in temp nel file, con 2 cifre dopo virgola
-        if ((i + 2) % 7 == 1)
-        {
-            fprintf(fp, "\n"); //generare rige con 7 elementi, evitando di lasciare spazio a prima riga
-        }
+        fprintf(fp,"\n");
     }
 }
 

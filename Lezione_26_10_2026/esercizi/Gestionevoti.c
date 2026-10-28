@@ -250,7 +250,7 @@ void salva(Studente *classe, int *p)
         printf("Errore nel salvare dati\n");
         return;
     }
-    size_t flag; //inizializzare indicatore per controllo di scrittura
+    size_t flag; //dichiarare indicatore per controllo di scrittura
     flag = fwrite(p, sizeof(int), 1, fp); //si scrive all'inizio valore di studenti registrati per essere usati dopo
     if (flag != 1)
     { //controllo
